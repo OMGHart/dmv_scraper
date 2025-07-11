@@ -1,15 +1,16 @@
 import requests
-from bs4 import BeautifulSoup
 from datetime import datetime
 import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
 from datetime import datetime
 import time
-
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import os
 import base64
+from bs4 import BeautifulSoup
+
 
 def write_temp_credentials():
     """Decode GOOGLE_CREDS_B64 into creds.json if running in GitHub Actions"""
@@ -26,8 +27,11 @@ scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
-creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("dmv-logger-credentials.json", scope)
 client = gspread.authorize(creds)
+for s in client.openall():
+    print("📄 Found sheet:", s.title)
+
 sheet = client.open("DMV Wait Times").sheet1  # Use your sheet name
 
 
