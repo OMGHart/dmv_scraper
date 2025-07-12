@@ -1,4 +1,6 @@
 gspread
 oauth2client
 beautifulsoup4
+beautifulsoup
+BeautifulSoup
 bs4
