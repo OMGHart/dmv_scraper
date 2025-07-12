@@ -18,7 +18,7 @@ def write_temp_credentials():
     if not encoded:
         raise RuntimeError("❌ GOOGLE_CREDS_B64 not set in environment")
     
-    with open("creds.json", "wb") as f:
+    with open("dmv-logger-credentials.json", "wb") as f:
         f.write(base64.b64decode(encoded))
 
 write_temp_credentials()
