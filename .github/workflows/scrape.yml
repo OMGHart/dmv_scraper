@@ -1,5 +1,5 @@
-- name: Show structure
-  run: ls -R
+# - name: Show structure
+#   run: ls -R
   # working directory: dmv_scraper
 
 
