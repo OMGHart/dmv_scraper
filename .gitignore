@@ -1,3 +1,5 @@
 dmv-logger-credentials.json
 creds.b64
 creds.json
+.ipynb_checkpoints/
+
