@@ -1,3 +1,8 @@
+- name: Show structure
+  run: ls -R
+  working directory: dmv_scraper
+
+
 name: Scrape DMV Wait Times
 
 on:
@@ -8,6 +13,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    working directory: dmv_scraper
 
     steps:
     - uses: actions/checkout@v3
@@ -21,6 +27,7 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run scraper
+      working directory: dmv_scraper
       env:
         GOOGLE_CREDS_B64: ${{ secrets.GOOGLE_CREDS_B64 }}
       run: python scraper.py
