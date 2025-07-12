@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 
 def write_temp_credentials():
-    """Decode GOOGLE_CREDS_B64 i nto creds.json if running in GitHub Actions"""
+    """Decode GOOGLE_CREDS_B64 into creds.json if running in GitHub Actions"""
     encoded = os.environ.get("GOOGLE_CREDS_B64")
     if not encoded:
         raise RuntimeError("❌ GOOGLE_CREDS_B64 not set in environment")
