@@ -1,4 +1,4 @@
 gspread
 oauth2client
-bs4
+beautifulsoup4
 
