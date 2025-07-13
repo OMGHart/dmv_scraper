@@ -2,7 +2,7 @@ name: Scrape DMV Wait Times
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
+    - cron: '*/15 * * * *'  
   workflow_dispatch:
 
 jobs:
@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Print UTC time
+        run: date -u
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -19,7 +21,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
       - name: Run scraper
+        env: 
+          GOOGLE_CREDS_B64: ${{ secrets.GOOGLE_CREDS_B64 }}
         run: |
           python scraper.py
+# Dummy change
