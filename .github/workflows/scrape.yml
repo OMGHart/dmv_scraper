@@ -2,7 +2,7 @@ name: Scrape DMV Wait Times
 
 on:
   schedule:
-    - cron: '*/15 12-21 * * *'  # Every 15 minutes, 8 to 5 pm. For science.
+    - cron: '*/15 12-22 * * *'  # Every 15 minutes, 8 to 6 pm. For science.
     # - cron:
   workflow_dispatch:
 
