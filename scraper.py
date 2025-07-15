@@ -3,7 +3,7 @@ from datetime import datetime
 import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import time
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
@@ -76,7 +76,11 @@ def scrape_wait_time(url):
 
 def scrape_all_locations():
     results = []
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    tz_utc = timezone.utc
+    tz_eastern = timezone(timedelta(hours=-4))
+    # now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.now().astimezone(tzinfo=tz_utc)
+    now = now.astimezone(tz_eastern)
     for name, url in LOCATIONS.items():
         try:
             wait_time = scrape_wait_time(url)
