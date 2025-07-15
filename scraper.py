@@ -79,8 +79,8 @@ def scrape_all_locations():
     tz_utc = timezone.utc
     tz_eastern = timezone(timedelta(hours=-4))
     # now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    now = datetime.now().astimezone(tzinfo=tz_utc)
-    now = now.astimezone(tz_eastern)
+    now = datetime.now().astimezone(tz_eastern)
+    # now = now.astimezone(tz_eastern)
     for name, url in LOCATIONS.items():
         try:
             wait_time = scrape_wait_time(url)
