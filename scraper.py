@@ -69,7 +69,7 @@ def scrape_wait_time(url):
             if "Max Wait Time" not in cell_texts:
                 return cell_texts[3]  # Max Wait Time
 
-    return "Not Found"
+    return "No Data"
 
 
 
