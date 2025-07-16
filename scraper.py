@@ -36,15 +36,37 @@ sheet = client.open("DMV Wait Times").sheet1  # Use your sheet name
 
 
 
+# LOCATIONS = {
+#     "Greenville - Saluda Dam": "https://scdmvonline.com/Locations/Greenville-63-Saluda-Dam",
+#     "Greenville - Edgeworth": "https://scdmvonline.com/Locations/Greenville-123-Edgeworth",
+#     "Pickens": "https://scdmvonline.com/Locations/Pickens",
+#     "Greer": "https://scdmvonline.com/Locations/Greer",
+#     "Fountain Inn": "https://scdmvonline.com/Locations/Fountain-Inn"
+    
+    
+#     # Add more as needed
+# }
+
 LOCATIONS = {
     "Greenville - Saluda Dam": "https://scdmvonline.com/Locations/Greenville-63-Saluda-Dam",
     "Greenville - Edgeworth": "https://scdmvonline.com/Locations/Greenville-123-Edgeworth",
     "Pickens": "https://scdmvonline.com/Locations/Pickens",
     "Greer": "https://scdmvonline.com/Locations/Greer",
-    "Fountain Inn": "https://scdmvonline.com/Locations/Fountain-Inn"
-    
-    
-    # Add more as needed
+    "Fountain Inn": "https://scdmvonline.com/Locations/Fountain-Inn",
+    "Spartanburg - Fairforest Road": "https://scdmvonline.com/Locations/Spartanburg-42-Fairforest",
+    "Woodruff": "https://scdmvonline.com/Locations/Woodruff",
+    "Belton": "https://scdmvonline.com/Locations/Belton",
+    "Anderson": "https://scdmvonline.com/Locations/Anderson",
+    "Spartanburg - Southport Road": "https://scdmvonline.com/Locations/Spartanburg-87-Southport-Rd",
+    "Seneca": "https://scdmvonline.com/Locations/Seneca",
+    "Laurens": "https://scdmvonline.com/Locations/Laurens",
+    "Gaffney": "https://scdmvonline.com/Locations/Gaffney",
+    "Union": "https://scdmvonline.com/Locations/Union",
+    "Abbeville": "https://scdmvonline.com/Locations/Abbeville",
+    "Greenwood": "https://scdmvonline.com/Locations/Greenwood",
+    "Saluda": "https://scdmvonline.com/Locations/Saluda",
+    "Rock Hill": "https://scdmvonline.com/Locations/Rock-Hill"
+
 }
 
 def scrape_wait_time(url):
