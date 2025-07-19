@@ -1,9 +1,6 @@
-import requests
-from datetime import datetime
-import csv
+from datetime import datetime, timezone, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from datetime import datetime, timezone, timedelta
 import time
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
@@ -20,18 +17,22 @@ def write_temp_credentials():
     with open("dmv-logger-credentials.json", "wb") as f:
         f.write(base64.b64decode(encoded))
 
-write_temp_credentials()
+def get_sheet():
+    """Return the Google Sheet used for logging wait times."""
+    write_temp_credentials()
 
-scope = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/drive"
-]
-creds = ServiceAccountCredentials.from_json_keyfile_name("dmv-logger-credentials.json", scope)
-client = gspread.authorize(creds)
-for s in client.openall():
-    print("📄 Found sheet:", s.title)
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        "dmv-logger-credentials.json", scope
+    )
+    client = gspread.authorize(creds)
+    for s in client.openall():
+        print("📄 Found sheet:", s.title)
 
-sheet = client.open("DMV Wait Times").sheet1  # Use your sheet name
+    return client.open("DMV Wait Times").sheet1  # Use your sheet name
 
 
 
@@ -76,12 +77,14 @@ def scrape_wait_time(url):
     chrome_options.add_argument("--disable-dev-shm-usage")
 
     driver = webdriver.Chrome(options=chrome_options)
-    driver.get(url)
-    time.sleep(3)
+    try:
+        driver.get(url)
+        time.sleep(3)
 
-    html = driver.page_source
-    soup = BeautifulSoup(html, "html.parser")
-    driver.quit()
+        html = driver.page_source
+        soup = BeautifulSoup(html, "html.parser")
+    finally:
+        driver.quit()
 
     rows = soup.find_all("tr")
     for row in rows:
@@ -110,8 +113,14 @@ def scrape_all_locations():
             results.append((now, name, f"Error: {e}"))
     return results
 
-results = scrape_all_locations()
+def main():
+    sheet = get_sheet()
+    results = scrape_all_locations()
 
-for row in results:
-    sheet.append_row(list(row))
+    for row in results:
+        sheet.append_row(list(row))
+
+
+if __name__ == "__main__":
+    main()
 
