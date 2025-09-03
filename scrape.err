@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/hart/dmv/scraper.py", line 23, in <module>
+    write_temp_credentials()
+  File "/home/hart/dmv/scraper.py", line 18, in write_temp_credentials
+    raise RuntimeError("❌ GOOGLE_CREDS_B64 not set in environment")
+RuntimeError: ❌ GOOGLE_CREDS_B64 not set in environment
+Traceback (most recent call last):
+  File "/home/hart/dmv/scraper.py", line 23, in <module>
+    write_temp_credentials()
+  File "/home/hart/dmv/scraper.py", line 18, in write_temp_credentials
+    raise RuntimeError("❌ GOOGLE_CREDS_B64 not set in environment")
+RuntimeError: ❌ GOOGLE_CREDS_B64 not set in environment

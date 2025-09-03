@@ -1,0 +1,5 @@
+creds.json
+.venv/
+.env
+*.log
+other/
