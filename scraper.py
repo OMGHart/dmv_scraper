@@ -18,6 +18,7 @@ import undetected_chromedriver as uc
 import shutil
 import re
 from google.cloud import bigquery 
+import time
 
 
 LOCATIONS = {'Abbeville': 'https://scdmvonline.com/Locations/Abbeville',
@@ -271,10 +272,15 @@ def make_driver():
 
 def scrape_wait_time(driver, url):
     try:
+        t0 = time.time()
+        print(f"Loading URL: {url}")
         driver.get(url)
+        print(f"Loaded URL: {url} after {time.time()-t0:.2f}s")
+        t1 = time.time()
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table"))
-        )                   
+        )       
+        print(f"Table loaded after {time.time()-t1:.2f}s")            
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         for row in soup.find_all("tr"):
