@@ -322,5 +322,5 @@ if __name__ == "__main__":
     #         sheets_ok = True
 
     # print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'} | Sheets: {'OK' if sheets_ok else 'FAIL'}")
-    print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'})
+    print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'}")
 
