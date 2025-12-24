@@ -219,7 +219,7 @@ def make_driver():
             "chromedriver is not installed. Install with: sudo apt install chromium-driver"
         )
 
-    opts = Options()
+    opts = uc.ChromeOptions()
 
     for p in CHROMIUM_PATHS:
         if os.path.exists(p):
@@ -243,7 +243,8 @@ def make_driver():
     # Use the system chromedriver that matches Chromium
     service = Service(CHROMEDRIVER_PATH)
     try:
-        driver = webdriver.Chrome(service=service, options=opts)
+        # driver = webdriver.Chrome(service=service, options=opts)
+        driver = uc.Chrome(options=opts, headless=True)
     except WebDriverException as e:
         raise RuntimeError(
             "Failed to start Chrome via system chromedriver. "
