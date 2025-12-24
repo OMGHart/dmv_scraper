@@ -230,6 +230,7 @@ def make_driver():
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--disable-gpu")
+    opts.add_argument("--disable-software-rasterizer")
     opts.add_argument("--window-size=1280,800")
     opts.page_load_strategy = "eager"
     opts.add_experimental_option("prefs", {
