@@ -1,24 +1,23 @@
-import requests
 from datetime import datetime
-import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import WebDriverException 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from shutil import which
-from datetime import datetime, timezone, timedelta
-import time
+from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import os
-import base64
 import sys
 from bs4 import BeautifulSoup
 from zoneinfo import ZoneInfo
 import undetected_chromedriver as uc
 import shutil
 import re
-
+from google.cloud import bigquery 
 
 
 LOCATIONS = {'Abbeville': 'https://scdmvonline.com/Locations/Abbeville',
@@ -109,6 +108,82 @@ if not os.path.exists(CRED_PATH):
 creds = ServiceAccountCredentials.from_json_keyfile_name(CRED_PATH, SCOPES)
 client = gspread.authorize(creds)
 
+###BigQuery
+
+
+BQ_PROJECT = "dmv-scraper-465620"
+BQ_DATASET = "dmv"
+BQ_TABLE   = "wait_times"
+bq_client = bigquery.Client.from_service_account_json(CRED_PATH, project=BQ_PROJECT)
+
+def ensure_bq_objects():
+    # Ensure dataset exists
+    ds_ref = bigquery.DatasetReference(BQ_PROJECT, BQ_DATASET)
+    try:
+        bq_client.get_dataset(ds_ref)
+    except Exception:
+        ds = bigquery.Dataset(ds_ref)
+        ds.location = "US"
+        bq_client.create_dataset(ds, timeout=30)
+
+    # Ensure table exists (partitioned by date(timestamp), clustered by location)
+    tbl_ref = ds_ref.table(BQ_TABLE)
+    try:
+        bq_client.get_table(tbl_ref)
+    except Exception:
+        schema = [
+            bigquery.SchemaField("timestamp", "TIMESTAMP", mode="REQUIRED"),
+            bigquery.SchemaField("location",  "STRING",    mode="REQUIRED"),
+            bigquery.SchemaField("wait_raw",  "STRING"),
+            bigquery.SchemaField("wait_min",  "INT64"),
+            bigquery.SchemaField("status",    "STRING"),
+        ]
+        tbl = bigquery.Table(tbl_ref, schema=schema)
+        tbl.time_partitioning = bigquery.TimePartitioning(field="timestamp")
+        tbl.clustering_fields = ["location"]
+        bq_client.create_table(tbl, timeout=30)
+
+def _parse_wait_minutes(wait_raw: str):
+    if not wait_raw or "no data" in wait_raw.lower():
+        return None, "No Data"
+    if "error" in wait_raw.lower():
+        return None, "Error"
+    m = re.search(r"(\d+)", wait_raw)
+    if m:
+        return int(m.group(1)), "OK"
+    return None, "Unknown"
+
+def load_rows_to_bq(rows):
+    """
+    rows = [(timestamp_str, location, wait_raw), ...]
+    """
+    ensure_bq_objects()
+
+    payload = []
+    for ts, loc, raw in rows:
+        wait_min, status = _parse_wait_minutes(raw)
+        payload.append({
+            "timestamp": ts,   # RFC3339 string okay
+            "location":  loc,
+            "wait_raw":  raw,
+            "wait_min":  wait_min,
+            "status":    status,
+        })
+
+    table_id = f"{BQ_PROJECT}.{BQ_DATASET}.{BQ_TABLE}"
+    errors = bq_client.insert_rows_json(table_id, payload)
+    if errors:
+        print("[BQ] insert errors (first):", errors[:1])
+    else:
+        print(f"[BQ] inserted {len(payload)} rows into {table_id}")
+
+
+print("Who am I:", bq_client.project)
+print("Datasets:", [d.dataset_id for d in bq_client.list_datasets()])
+
+
+### End BigQuery
+
 MONTH_TAB_FORMAT = "%Y-%m"
 HEADER_ROW = ["Timestamp", "Location", "Wait Time"]
 
@@ -144,14 +219,10 @@ def make_driver():
         )
 
     opts = Options()
-    # (Optional) pin the exact path; Chromium finds itself, but this is explicit.
+
     for p in CHROMIUM_PATHS:
-        if shutil.which(p) or p == "/usr/bin/chromium":
-            # only set if the path exists; harmless otherwise
-            try:
-                opts.binary_location = p
-            except Exception:
-                pass
+        if os.path.exists(p):
+            opts.binary_location = p
             break
 
     # Your existing flags/prefs
@@ -190,16 +261,19 @@ def make_driver():
     def mm(v):
         m = re.match(r"(\d+)\.(\d+)", str(v))
         return m.groups() if m else ("", "")
+    
     if mm(br) != mm(dr):
-        print("[WARN] Browser and driver versions may not match. "
-              "Run: sudo apt update && sudo apt install -y chromium chromium-driver")
+        print(f"[WARN] Browser/driver mismatch: browser={br}, driver={dr}. "
+            "Run: sudo apt update && sudo apt install -y chromium chromium-driver")
 
     return driver
 
 def scrape_wait_time(driver, url):
     try:
         driver.get(url)
-        time.sleep(2)                       # small, consistent render pause
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "table"))
+        )                   
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         for row in soup.find_all("tr"):
@@ -223,19 +297,29 @@ def scrape_all_locations():
         for name, url in LOCATIONS.items():
             wt = scrape_wait_time(driver, url)
             if len(wt) > 120:
-                wt = "Error: too long"
+                wt = "No Data"
             rows.append((now, name, wt))
     finally:
         driver.quit()
     return rows
 
-
 if __name__ == "__main__":
     rows = scrape_all_locations()
     print(f"[dmv] rows prepared: {len(rows)}")
+    bq_ok = False
+    try:
+        load_rows_to_bq(rows)
+        bq_ok = True
+    except Exception as e:
+        sys.stderr.write(f"[ERROR][BQ] {e}\n")
+    sheets_ok = False
     try:
         sheet.append_rows(rows, value_input_option="USER_ENTERED")
+        sheets_ok = True
     except AttributeError:
         for r in rows:
             sheet.append_row(list(r), value_input_option="USER_ENTERED")
+            sheets_ok = True
+
+    print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'} | Sheets: {'OK' if sheets_ok else 'FAIL'}")
 
