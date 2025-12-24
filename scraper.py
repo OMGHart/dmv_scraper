@@ -292,10 +292,13 @@ def scrape_all_locations():
     now = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S")
     rows = []
 
+    print("About to create driver")
     driver = make_driver()
+    print("Driver created")
     try:
         for name, url in LOCATIONS.items():
             wt = scrape_wait_time(driver, url)
+            print("URL loaded")
             if len(wt) > 120:
                 wt = "No Data"
             rows.append((now, name, wt))
