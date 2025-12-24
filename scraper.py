@@ -14,7 +14,7 @@ import os
 import sys
 from bs4 import BeautifulSoup
 from zoneinfo import ZoneInfo
-import undetected_chromedriver as uc
+# import undetected_chromedriver as uc
 import shutil
 import re
 from google.cloud import bigquery 
@@ -219,7 +219,7 @@ def make_driver():
             "chromedriver is not installed. Install with: sudo apt install chromium-driver"
         )
 
-    opts = uc.ChromeOptions()
+    opts = Options()
 
     for p in CHROMIUM_PATHS:
         if os.path.exists(p):
@@ -227,7 +227,7 @@ def make_driver():
             break
 
     # Your existing flags/prefs
-    opts.add_argument("--headless=new")
+    opts.add_argument("--headless=old")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--disable-gpu")
@@ -243,8 +243,8 @@ def make_driver():
     # Use the system chromedriver that matches Chromium
     service = Service(CHROMEDRIVER_PATH)
     try:
-        # driver = webdriver.Chrome(service=service, options=opts)
-        driver = uc.Chrome(options=opts, headless=True)
+        driver = webdriver.Chrome(service=service, options=opts)
+        # driver = uc.Chrome(options=opts, headless=True)
     except WebDriverException as e:
         raise RuntimeError(
             "Failed to start Chrome via system chromedriver. "
