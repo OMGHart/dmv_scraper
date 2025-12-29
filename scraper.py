@@ -188,23 +188,7 @@ print("Datasets:", [d.dataset_id for d in bq_client.list_datasets()])
 MONTH_TAB_FORMAT = "%Y-%m"
 HEADER_ROW = ["Timestamp", "Location", "Wait Time"]
 
-### Google Sheets (retired)
-# def ensure_month_worksheet(spreadsheet, tz="America/New_York"):
-#     title = datetime.now(ZoneInfo(tz)).strftime(MONTH_TAB_FORMAT)
-#     try:
-#         return spreadsheet.worksheet(title)
-#     except gspread.exceptions.WorksheetNotFound:
-#         ws = spreadsheet.add_worksheet(title=title, rows=1000, cols=max(10, len(HEADER_ROW)))
-#         ws.update("A1", [HEADER_ROW])
-#         try:
-#             ws.freeze(rows=1)
-#             ws.format("A1:Z1", {"textFormat": {"bold": True}})
-#         except Exception:
-#             pass
-#         return ws
 
-# sh = client.open("DMV Wait Times")
-# sheet = ensure_month_worksheet(sh)
 
 CHROMEDRIVER_PATH = "/usr/bin/chromedriver"   # Debian/RPi location
 CHROMIUM_PATHS = ("/usr/bin/chromium", "/usr/bin/chromium-browser")
@@ -323,15 +307,6 @@ if __name__ == "__main__":
         bq_ok = True
     except Exception as e:
         sys.stderr.write(f"[ERROR][BQ] {e}\n")
-    # sheets_ok = False
-    # try:
-    #     sheet.append_rows(rows, value_input_option="USER_ENTERED")
-    #     sheets_ok = True
-    # except AttributeError:
-    #     for r in rows:
-    #         sheet.append_row(list(r), value_input_option="USER_ENTERED")
-    #         sheets_ok = True
 
-    # print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'} | Sheets: {'OK' if sheets_ok else 'FAIL'}")
     print(f"[done] BigQuery: {'OK' if bq_ok else 'FAIL'}")
 
